@@ -11,6 +11,7 @@ export interface UseMediaPipeReturn {
 
 export function useMediaPipeFaceLandmarker(): UseMediaPipeReturn {
   const landmarkerRef = useRef<FaceLandmarker | null>(null);
+  const [landmarker, setLandmarker] = useState<FaceLandmarker | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,22 +21,38 @@ export function useMediaPipeFaceLandmarker(): UseMediaPipeReturn {
     async function initializeMediaPipe() {
       try {
         const filesetResolver = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm"
         );
 
-        const faceLandmarkerInstance = await FaceLandmarker.createFromOptions(filesetResolver, {
-          baseOptions: {
-            modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
-            delegate: "GPU",
-          },
-          outputFaceBlendshapes: true,
-          outputFacialTransformationMatrixes: true,
-          runningMode: "VIDEO",
-          numFaces: 2,
-        });
+        let faceLandmarkerInstance: FaceLandmarker;
+        try {
+          faceLandmarkerInstance = await FaceLandmarker.createFromOptions(filesetResolver, {
+            baseOptions: {
+              modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
+              delegate: "GPU",
+            },
+            outputFaceBlendshapes: true,
+            outputFacialTransformationMatrixes: true,
+            runningMode: "VIDEO",
+            numFaces: 2,
+          });
+        } catch (gpuErr) {
+          console.warn("GPU delegate failed for MediaPipe, attempting CPU delegate:", gpuErr);
+          faceLandmarkerInstance = await FaceLandmarker.createFromOptions(filesetResolver, {
+            baseOptions: {
+              modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
+              delegate: "CPU",
+            },
+            outputFaceBlendshapes: true,
+            outputFacialTransformationMatrixes: true,
+            runningMode: "VIDEO",
+            numFaces: 2,
+          });
+        }
 
         if (isMounted) {
           landmarkerRef.current = faceLandmarkerInstance;
+          setLandmarker(faceLandmarkerInstance);
           setIsLoaded(true);
         }
       } catch (err: any) {
@@ -51,14 +68,18 @@ export function useMediaPipeFaceLandmarker(): UseMediaPipeReturn {
     return () => {
       isMounted = false;
       if (landmarkerRef.current) {
-        landmarkerRef.current.close();
+        try {
+          landmarkerRef.current.close();
+        } catch {
+          // ignore
+        }
         landmarkerRef.current = null;
       }
     };
   }, []);
 
   return {
-    landmarker: landmarkerRef.current,
+    landmarker,
     isLoaded,
     error,
   };

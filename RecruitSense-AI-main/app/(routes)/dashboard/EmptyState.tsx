@@ -12,7 +12,7 @@ function EmptyState() {
       <div className="space-y-1">
         <h2 className="text-xl font-bold text-slate-900">No Mock Interviews Found</h2>
         <p className="text-xs text-slate-500 max-w-sm">
-          You haven't created any AI mock interview sessions yet. Upload a resume or provide a job description to get started.
+          You haven&apos;t created any AI mock interview sessions yet. Upload a resume or provide a job description to get started.
         </p>
       </div>
 

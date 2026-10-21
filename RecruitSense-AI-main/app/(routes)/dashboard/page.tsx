@@ -1,26 +1,18 @@
 "use client";
 
 import React, { useContext } from "react";
-import { useUser } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { UserDetailContext } from "@/context/UserDetailContext";
 import EmptyState from "./EmptyState";
 import CreateInterviewDialog from "../_components/CreateInterviewDialog";
 import { ProgressStats } from "./_components/ProgressStats";
 import { InterviewItemCard } from "./_components/InterviewItemCard";
 import { History, Sparkles, Loader2 } from "lucide-react";
+import { useAppUser } from "@/hooks/useAppUser";
+import { useStoredInterviewList } from "@/lib/interviewStorage";
 
 export default function DashboardPage() {
-  const { user } = useUser();
-  const { userDetail } = useContext(UserDetailContext);
-
-  const interviewList = useQuery(
-    api.Interview.GetUserInterviews,
-    userDetail?._id ? { userId: userDetail._id } : "skip"
-  );
-
-  const isLoading = interviewList === undefined;
+  const { user } = useAppUser();
+  const { list: interviewList, isLoading } = useStoredInterviewList();
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 p-6 md:p-10 lg:p-12 space-y-8 max-w-7xl mx-auto font-sans">
@@ -28,10 +20,11 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div className="space-y-1">
           <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            Welcome back, {user?.fullName || "Candidate"} <Sparkles className="w-6 h-6 text-indigo-600" />
+            Welcome back, {user?.fullName || "Candidate"}{" "}
+            <Sparkles className="w-6 h-6 text-indigo-600 animate-pulse" />
           </h1>
           <p className="text-sm text-slate-600">
-            Track your mock interview history, review technical feedback, and monitor progress.
+            Track your mock interview history, review technical feedback, and monitor your neural network performance scores.
           </p>
         </div>
 

@@ -1,16 +1,18 @@
-
 import type { Metadata } from "next";
 import { Raleway } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
-import { ConvexClientProvider } from "./ConvexClientProvider";
+import { AppProviders } from "./AppProviders";
 
 export const metadata: Metadata = {
-  title: "PrepAI | AI Interview Platform",
-  description: "Prepare for interviews with AI-powered practice and feedback.",
+  title: "RecruitSense-AI | AI Interview Platform",
+  description: "Prepare for interviews with AI-powered practice, real-time emotion telemetry, and custom neural network scoring.",
 };
 
 const raleway = Raleway({ subsets: ["latin"] });
+
+const clerkPublishableKey =
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+  "pk_test_Y2xlcmsuZXhhbXBsZS5jb20k";
 
 export default function RootLayout({
   children,
@@ -20,11 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={raleway.className}>
-        <ClerkProvider>
-          <ConvexClientProvider>
-            {children}
-          </ConvexClientProvider>
-        </ClerkProvider>
+        <AppProviders clerkKey={clerkPublishableKey}>
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

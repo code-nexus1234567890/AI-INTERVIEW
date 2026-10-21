@@ -25,20 +25,22 @@ export function useWebcam({
   autoStart = true,
 }: UseWebcamOptions = {}): UseWebcamReturn {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [status, setStatus] = useState<"idle" | "requesting" | "active" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const stopWebcam = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      setStream(null);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
     }
+    setStream(null);
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
     setStatus("idle");
-  }, [stream]);
+  }, []);
 
   const startWebcam = useCallback(async () => {
     setStatus("requesting");
@@ -58,6 +60,7 @@ export function useWebcam({
         audio: false,
       });
 
+      streamRef.current = mediaStream;
       setStream(mediaStream);
 
       if (videoRef.current) {
