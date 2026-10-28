@@ -38,6 +38,7 @@ export function useEmotionTracker({
 }: UseEmotionTrackerOptions) {
   const requestRef = useRef<number | null>(null);
   const lastSampleTimeRef = useRef<number>(0);
+  const lastTimestampRef = useRef<number>(0);
   const startTimeRef = useRef<number>(Date.now());
   const smileStateRef = useRef<boolean>(false);
 
@@ -70,9 +71,10 @@ export function useEmotionTracker({
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
   const processFrame = useCallback(() => {
+    if (!active) return;
+
     const isLoaded = isMediaPipeLoaded ?? Boolean(landmarker);
     if (
-      !active ||
       !isLoaded ||
       !landmarker ||
       !videoRef.current ||
@@ -89,7 +91,11 @@ export function useEmotionTracker({
     }
 
     const now = Date.now();
-    const timestamp = performance.now();
+    let timestamp = performance.now();
+    if (timestamp <= lastTimestampRef.current) {
+      timestamp = lastTimestampRef.current + 1;
+    }
+    lastTimestampRef.current = timestamp;
 
     try {
       const results = landmarker.detectForVideo(video, timestamp);
@@ -174,19 +180,21 @@ export function useEmotionTracker({
 
         setCurrentAnalysis(analysis);
 
-        // Sample timeline snapshot every 1000ms
+        // Sample timeline snapshot every 1000ms (max 300 snapshots)
         if (now - lastSampleTimeRef.current >= 1000) {
           lastSampleTimeRef.current = now;
           const relativeSec = Math.floor((now - startTimeRef.current) / 1000);
 
-          timelineRef.current.push({
-            timestamp: relativeSec,
-            dominantEmotion: dominant,
-            engagementScore,
-            isEyeContact,
-            isSmiling,
-            emotionScores,
-          });
+          if (timelineRef.current.length < 300) {
+            timelineRef.current.push({
+              timestamp: relativeSec,
+              dominantEmotion: dominant,
+              engagementScore,
+              isEyeContact,
+              isSmiling,
+              emotionScores,
+            });
+          }
         }
       }
     } catch (err) {

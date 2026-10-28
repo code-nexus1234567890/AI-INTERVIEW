@@ -204,7 +204,7 @@ const SEED_INTERVIEWS: StoredInterview[] = [
   },
   {
     _id: "demo-interview-ai-002",
-    userId: "user_ayush_candidate",
+    userId: "user_sarah_candidate",
     jobTitle: "AI & Machine Learning Solutions Engineer",
     jobDescription: "PyTorch, Multimodal Deep Learning, On-Device Vision Inference, MediaPipe, Model Optimization.",
     status: "completed",
@@ -300,6 +300,102 @@ const SEED_INTERVIEWS: StoredInterview[] = [
       ],
     },
   },
+  {
+    _id: "demo-interview-devops-003",
+    userId: "user_marcus_candidate",
+    jobTitle: "Senior Cloud & DevOps Architect",
+    jobDescription: "Kubernetes, Terraform, AWS Multi-Region, Zero-Downtime CI/CD, Observability.",
+    status: "completed",
+    createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+    interviewQuestions: [
+      {
+        questionId: 1,
+        question: "How do you design a zero-downtime blue/green deployment strategy for a stateful Kubernetes cluster?",
+        answer: "Deploy a duplicate green pod replica set, verify readiness probes, sync stateful volumes with volume snapshots or distributed replication, transition ingress routing via weighted DNS or service selectors, and drain blue pods gracefully.",
+      },
+      {
+        questionId: 2,
+        question: "How do you structure Terraform state to prevent locking collisions and state corruption across 20+ engineering squads?",
+        answer: "Separate state by domain and environment into dedicated S3 backends with DynamoDB state locking, enforce remote module versioning, and run CI plan/apply via Atlantis or Terraform Cloud.",
+      },
+    ],
+    userAnswers: [
+      {
+        questionId: 1,
+        question: "How do you design a zero-downtime blue/green deployment strategy for a stateful Kubernetes cluster?",
+        userAnswer: "We deploy the green release alongside blue, validate health probes and data consistency, then switch traffic using an Ingress controller or service selector. Once stable, blue is decommissioned.",
+        modelAnswer: "Deploy a duplicate green pod replica set, verify readiness probes, sync stateful volumes, transition ingress routing, and drain blue pods gracefully.",
+      },
+      {
+        questionId: 2,
+        question: "How do you structure Terraform state to prevent locking collisions and state corruption across 20+ engineering squads?",
+        userAnswer: "We split state per service tier into isolated S3 buckets with DynamoDB locking tables, restricting writes through automated CI/CD pipelines.",
+        modelAnswer: "Separate state by domain and environment into dedicated S3 backends with DynamoDB state locking, enforce remote module versioning.",
+      },
+    ],
+    sessionAnalytics: {
+      averageEngagement: 88,
+      eyeContactPercentage: 86,
+      smileCount: 2,
+      smileFrequency: 0.9,
+      dominantEmotion: "Neutral",
+      emotionDistribution: {
+        Neutral: 82,
+        Happy: 14,
+        Surprise: 4,
+      },
+      confidenceScore: 90,
+      timeline: [
+        { timestamp: 5, dominantEmotion: "Neutral", engagementScore: 88, isEyeContact: true, isSmiling: false, emotionScores: { Neutral: 0.88, Happy: 0.12 } },
+        { timestamp: 25, dominantEmotion: "Neutral", engagementScore: 91, isEyeContact: true, isSmiling: false, emotionScores: { Neutral: 0.85, Happy: 0.15 } },
+      ],
+    },
+    aiEvaluation: {
+      technicalScore: 89,
+      behavioralScore: 88,
+      overallScore: 89,
+      mlModelScore: 89,
+      mlModelRaw: 0.892,
+      mlPerformanceBand: "Outstanding",
+      mlFeatures: {
+        confidenceScore: 0.9,
+        facialExpression: 0.8,
+        speakingSkills: 0.89,
+      },
+      answeredCount: 2,
+      unansweredCount: 0,
+      strengths: [
+        "Deep understanding of Kubernetes stateful workload lifecycle",
+        "Solid infrastructure-as-code state segregation architecture",
+        "Strong vocal clarity and professional composure",
+      ],
+      improvementAreas: [
+        "Include disaster recovery RTO/RPO targets for multi-region failover",
+      ],
+      technicalFeedback: "Strong expertise in production Kubernetes clustering, CI/CD safety, and Terraform modularization.",
+      behavioralFeedback: "Articulate, calm under technical questioning, and direct camera eye contact.",
+      questionEvaluations: [
+        {
+          questionId: 1,
+          question: "How do you design a zero-downtime blue/green deployment strategy for a stateful Kubernetes cluster?",
+          status: "answered",
+          userAnswer: "We deploy the green release alongside blue, validate health probes and data consistency, then switch traffic using an Ingress controller or service selector. Once stable, blue is decommissioned.",
+          modelAnswer: "Deploy a duplicate green pod replica set, verify readiness probes, sync stateful volumes, transition ingress routing, and drain blue pods gracefully.",
+          score: 90,
+          aiFeedback: "Strong technical answer (90%). Accurately explained Kubernetes ingress shifting and probe validation.",
+        },
+        {
+          questionId: 2,
+          question: "How do you structure Terraform state to prevent locking collisions and state corruption across 20+ engineering squads?",
+          status: "answered",
+          userAnswer: "We split state per service tier into isolated S3 buckets with DynamoDB locking tables, restricting writes through automated CI/CD pipelines.",
+          modelAnswer: "Separate state by domain and environment into dedicated S3 backends with DynamoDB state locking, enforce remote module versioning.",
+          score: 88,
+          aiFeedback: "Good architectural approach (88%). Highlighted DynamoDB lock table and workspace partitioning.",
+        },
+      ],
+    },
+  },
 ];
 
 function getInitialInterviews(): StoredInterview[] {
@@ -312,7 +408,30 @@ function getInitialInterviews(): StoredInterview[] {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+      // Migrate existing seed interviews if needed
+      let hasChanges = false;
+      const updated = parsed.map((item: StoredInterview) => {
+        if (item._id === "demo-interview-ai-002" && item.userId === "user_ayush_candidate") {
+          hasChanges = true;
+          return { ...item, userId: "user_sarah_candidate" };
+        }
+        return item;
+      });
+
+      // Ensure Marcus's interview is included if missing
+      const hasMarcus = updated.some((item: StoredInterview) => item._id === "demo-interview-devops-003");
+      if (!hasMarcus) {
+        const marcusInterview = SEED_INTERVIEWS.find((s) => s._id === "demo-interview-devops-003");
+        if (marcusInterview) {
+          updated.push(marcusInterview);
+          hasChanges = true;
+        }
+      }
+
+      if (hasChanges) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      }
+      return updated;
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_INTERVIEWS));
     return SEED_INTERVIEWS;
@@ -367,7 +486,7 @@ export function createNewInterviewSession(params: {
 
   const newSession: StoredInterview = {
     _id: newId,
-    userId: params.uid || "user_ayush_candidate",
+    userId: params.uid || "user_guest",
     jobTitle: params.jobTitle || "Software Engineer",
     jobDescription: params.jobDescription || "",
     resumeUrl: params.resumeUrl || "",
@@ -407,16 +526,24 @@ export function saveSessionAnswersAndEvaluation(
 }
 
 /**
- * React hook to listen for interview list updates
+ * React hook to listen for interview list updates, optionally filtered by userId
  */
-export function useStoredInterviewList() {
+export function useStoredInterviewList(filterUserId?: string) {
   const [list, setList] = useState<StoredInterview[]>([]);
+  const [allSessions, setAllSessions] = useState<StoredInterview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadList = useCallback(() => {
-    setList(getInitialInterviews());
+    const all = getInitialInterviews();
+    setAllSessions(all);
+    if (filterUserId && filterUserId !== "all") {
+      const filtered = all.filter((item) => item.userId === filterUserId);
+      setList(filtered);
+    } else {
+      setList(all);
+    }
     setIsLoading(false);
-  }, []);
+  }, [filterUserId]);
 
   useEffect(() => {
     loadList();
@@ -434,7 +561,7 @@ export function useStoredInterviewList() {
     };
   }, [loadList]);
 
-  return { list, isLoading, reload: loadList };
+  return { list, allSessions, isLoading, reload: loadList };
 }
 
 /**

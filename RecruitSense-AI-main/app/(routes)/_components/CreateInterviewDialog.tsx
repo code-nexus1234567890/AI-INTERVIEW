@@ -67,7 +67,7 @@ const CreateInterviewDialog: React.FC = () => {
       const interviewId = createNewInterviewSession({
         questions,
         resumeUrl: resumeUrl || "",
-        uid: userDetail?._id || "user_ayush_candidate",
+        uid: userDetail?._id || "user_guest",
         jobTitle,
         jobDescription,
       });

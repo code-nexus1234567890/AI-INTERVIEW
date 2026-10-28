@@ -4,6 +4,7 @@ import React, { ReactNode } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { AuthFallbackProvider, isRealClerkKey } from "@/lib/authHelper";
+import { Toaster } from "sonner";
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -17,6 +18,7 @@ export function AppProviders({ children, clerkKey }: AppProvidersProps) {
     return (
       <ClerkProvider publishableKey={clerkKey}>
         <ConvexClientProvider>{children}</ConvexClientProvider>
+        <Toaster richColors position="top-right" />
       </ClerkProvider>
     );
   }
@@ -24,6 +26,8 @@ export function AppProviders({ children, clerkKey }: AppProvidersProps) {
   return (
     <AuthFallbackProvider>
       <ConvexClientProvider>{children}</ConvexClientProvider>
+      <Toaster richColors position="top-right" />
     </AuthFallbackProvider>
   );
 }
+

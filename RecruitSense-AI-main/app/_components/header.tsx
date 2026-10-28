@@ -8,7 +8,7 @@ import { useAppUser } from "@/hooks/useAppUser";
 import { ArrowRight, LayoutDashboard } from "lucide-react";
 
 const Header = () => {
-  const { isSignedIn } = useAppUser();
+  const { isSignedIn, user } = useAppUser();
 
   return (
     <nav className="flex w-full items-center justify-between border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 py-3.5 sticky top-0 z-50 shadow-sm font-sans">
@@ -43,7 +43,7 @@ const Header = () => {
 
         <Link href={isSignedIn ? "/dashboard" : "/sign-in"}>
           <Button className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow-sm transition-all hover:shadow-md">
-            <span>{isSignedIn ? "Enter App" : "Sign In"}</span>
+            <span>{isSignedIn ? `Continue as ${user?.firstName || "Candidate"}` : "Sign In"}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Button>
         </Link>

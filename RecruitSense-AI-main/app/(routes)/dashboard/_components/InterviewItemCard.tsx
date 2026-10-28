@@ -14,6 +14,20 @@ export function InterviewItemCard({ interview }: InterviewItemCardProps) {
   const evalData = interview?.aiEvaluation || {};
   const analytics = interview?.sessionAnalytics || {};
 
+  const candidateName =
+    interview?.candidateName ||
+    (interview?.userId === "user_sarah_candidate"
+      ? "Sarah Chen"
+      : interview?.userId === "user_marcus_candidate"
+      ? "Marcus Rodriguez"
+      : interview?.userId === "user_priya_candidate"
+      ? "Priya Patel"
+      : interview?.userId === "user_ayush_candidate"
+      ? "Ayush Sharma"
+      : interview?.userId === "user_guest"
+      ? "Guest Candidate"
+      : undefined);
+
   const createdDate = interview?.createdAt
     ? new Date(interview.createdAt).toLocaleDateString("en-US", {
         month: "short",
@@ -26,14 +40,21 @@ export function InterviewItemCard({ interview }: InterviewItemCardProps) {
     <div className="bg-white border border-slate-200 hover:border-indigo-300 transition-all rounded-2xl p-6 shadow-sm hover:shadow-md flex flex-col justify-between space-y-4 group">
       {/* Top Row: Title & Status Badge */}
       <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
+        <div className="space-y-1 min-w-0">
           <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
             {interview?.jobTitle || "Software Engineer Mock Interview"}
           </h3>
-          <p className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            <span>{createdDate}</span>
-          </p>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-medium">
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <span>{createdDate}</span>
+            </span>
+            {candidateName && (
+              <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">
+                {candidateName}
+              </span>
+            )}
+          </div>
         </div>
 
         {isCompleted ? (
@@ -80,17 +101,17 @@ export function InterviewItemCard({ interview }: InterviewItemCardProps) {
       {/* Footer Action Button */}
       <div className="pt-2">
         {isCompleted ? (
-          <Link href={`/interview/${interview._id}/feedback`} className="w-full">
-            <Button className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2.5 rounded-xl shadow-sm">
+          <Button asChild className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-2.5 rounded-xl shadow-sm">
+            <Link href={`/interview/${interview?._id}/feedback`}>
               <Trophy className="w-3.5 h-3.5" /> View Feedback Report
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         ) : (
-          <Link href={`/interview/${interview._id}`} className="w-full">
-            <Button variant="outline" className="w-full flex items-center justify-center gap-2 border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs py-2.5 rounded-xl">
+          <Button asChild variant="outline" className="w-full flex items-center justify-center gap-2 border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-xs py-2.5 rounded-xl">
+            <Link href={`/interview/${interview?._id}`}>
               Start Interview <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         )}
       </div>
     </div>

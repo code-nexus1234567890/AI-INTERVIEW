@@ -154,6 +154,7 @@ export default function StartInterviewPage() {
     if (isListening) {
       stopListening();
     } else {
+      stopSpeech();
       resetTranscript();
       startListening();
     }
@@ -202,10 +203,11 @@ export default function StartInterviewPage() {
             ? item.answer || item.idealAnswer || item.solution || ""
             : "";
 
+        const recordedAns = userAnswersMap[idx]?.trim();
         return {
           questionId: idx + 1,
           question: q,
-          userAnswer: userAnswersMap[idx] || "Candidate answered with practical implementation experience.",
+          userAnswer: recordedAns || "No response provided.",
           modelAnswer: refAnswer,
         };
       });

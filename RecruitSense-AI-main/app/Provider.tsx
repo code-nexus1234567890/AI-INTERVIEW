@@ -29,6 +29,8 @@ export function ProviderWithConvex({ children }: { children: React.ReactNode }) 
             imageUrl: user.imageUrl ?? "",
           });
         }
+      } else {
+        setUserDetail(null);
       }
     }
     handleUserCreation();
@@ -43,21 +45,27 @@ export function ProviderWithConvex({ children }: { children: React.ReactNode }) 
 
 export function ProviderWithoutConvex({ children }: { children: React.ReactNode }) {
   const { user } = useAppUser();
-  const [userDetail, setUserDetail] = useState<any>({
-    _id: "user_ayush_candidate",
-    name: "Ayush Sharma",
-    email: "ayush@recruitsense.ai",
-    imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80",
-  });
+  const [userDetail, setUserDetail] = useState<any>(
+    user
+      ? {
+          _id: user.id,
+          name: user.fullName,
+          email: user.primaryEmailAddress?.emailAddress,
+          imageUrl: user.imageUrl,
+        }
+      : null
+  );
 
   useEffect(() => {
     if (user) {
       setUserDetail({
-        _id: user.id || "user_ayush_candidate",
-        name: user.fullName || "Ayush Sharma",
-        email: user.primaryEmailAddress?.emailAddress || "ayush@recruitsense.ai",
+        _id: user.id,
+        name: user.fullName || "Candidate",
+        email: user.primaryEmailAddress?.emailAddress || "",
         imageUrl: user.imageUrl || "",
       });
+    } else {
+      setUserDetail(null);
     }
   }, [user]);
 
