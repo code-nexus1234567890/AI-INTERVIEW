@@ -426,6 +426,8 @@ This project is developed as a **Final Year Project** for academic purposes.
 ---
 
 <div align="center">
+LIVE APP: https://mockaiinterview-eta.vercel.app/
+
 
 ⭐ **If you found this project interesting, consider giving it a star!** ⭐
 
